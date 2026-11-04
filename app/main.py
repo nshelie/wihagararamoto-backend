@@ -41,10 +41,12 @@ def _ensure_schema_upgrades() -> None:
                 connection.execute(text("ALTER TABLE stations ADD COLUMN latitude FLOAT"))
             if "longitude" not in station_columns:
                 connection.execute(text("ALTER TABLE stations ADD COLUMN longitude FLOAT"))
-            # BUSY was merged into VERY_BUSY; keep old databases readable.
-            connection.execute(
-                text("UPDATE stations SET current_queue = 'VERY_BUSY' WHERE current_queue = 'BUSY'")
-            )
+            # BUSY was merged into VERY_BUSY; keep old SQLite databases readable.
+            # PostgreSQL enforces the enum type, so it rejects the old literal outright.
+            if engine.dialect.name == "sqlite":
+                connection.execute(
+                    text("UPDATE stations SET current_queue = 'VERY_BUSY' WHERE current_queue = 'BUSY'")
+                )
 
     if "station_requests" in existing_tables:
         request_columns = {
