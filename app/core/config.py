@@ -23,6 +23,9 @@ _database_url = os.getenv("DATABASE_URL", "sqlite:///./wihagararamoto.db")
 # Hosting dashboards sometimes hand out postgres:// URLs, which SQLAlchemy rejects.
 if _database_url.startswith("postgres://"):
     _database_url = "postgresql://" + _database_url[len("postgres://"):]
+# SQLAlchemy 2.1 defaults to the psycopg (v3) driver; this project installs psycopg2.
+if _database_url.startswith("postgresql://"):
+    _database_url = "postgresql+psycopg2://" + _database_url[len("postgresql://"):]
 
 
 class Settings:
